@@ -7,18 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A10000010000000000000001 /* CoachCardApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000001; };
-		A10000010000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000002; };
-		A10000010000000000000003 /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000003; };
-		A10000010000000000000004 /* CardTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000004; };
-		A10000010000000000000005 /* GalleryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000005; };
-		A10000010000000000000006 /* CardThumbnailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000006; };
-		A10000010000000000000007 /* CardEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000007; };
-		A10000010000000000000008 /* DisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000008; };
-		A10000010000000000000009 /* ScoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000009; };
-		A10000010000000000000010 /* GlowModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000010; };
-		A10000010000000000000011 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000011; };
-		A10000010000000000000012 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000012; };
+		A10000010000000000000001 /* CoachCardApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000001 /* CoachCardApp.swift */; };
+		A10000010000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000002 /* ContentView.swift */; };
+		A10000010000000000000003 /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000003 /* Card.swift */; };
+		A10000010000000000000004 /* CardTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000004 /* CardTheme.swift */; };
+		A10000010000000000000005 /* GalleryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000005 /* GalleryView.swift */; };
+		A10000010000000000000006 /* CardThumbnailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000006 /* CardThumbnailView.swift */; };
+		A10000010000000000000007 /* CardEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000007 /* CardEditorView.swift */; };
+		A10000010000000000000008 /* DisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000008 /* DisplayView.swift */; };
+		A10000010000000000000009 /* ScoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000009 /* ScoreView.swift */; };
+		A10000010000000000000010 /* GlowModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000010 /* GlowModifier.swift */; };
+		A10000010000000000000011 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000011 /* Assets.xcassets */; };
+		A10000010000000000000012 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000012 /* Preview Assets.xcassets */; };
+		A10000010000000000000013 /* WhiteboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000013 /* WhiteboardView.swift */; };
+		A10000010000000000000014 /* ColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000014 /* ColorExtensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +36,8 @@
 		A20000010000000000000010 /* GlowModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlowModifier.swift; sourceTree = "<group>"; };
 		A20000010000000000000011 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A20000010000000000000012 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		A20000010000000000000013 /* WhiteboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhiteboardView.swift; sourceTree = "<group>"; };
+		A20000010000000000000014 /* ColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtensions.swift; sourceTree = "<group>"; };
 		A30000010000000000000001 /* CoachCard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CoachCard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -87,6 +91,7 @@
 				A20000010000000000000007 /* CardEditorView.swift */,
 				A20000010000000000000008 /* DisplayView.swift */,
 				A20000010000000000000009 /* ScoreView.swift */,
+				A20000010000000000000013 /* WhiteboardView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -95,6 +100,7 @@
 			isa = PBXGroup;
 			children = (
 				A20000010000000000000010 /* GlowModifier.swift */,
+				A20000010000000000000014 /* ColorExtensions.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -143,7 +149,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1540;
-				LastUpgradeCheck = 1540;
+				LastUpgradeCheck = 2630;
 				TargetAttributes = {
 					A60000010000000000000001 = {
 						CreatedOnToolsVersion = 15.4;
@@ -195,6 +201,8 @@
 				A10000010000000000000008 /* DisplayView.swift in Sources */,
 				A10000010000000000000009 /* ScoreView.swift in Sources */,
 				A10000010000000000000010 /* GlowModifier.swift in Sources */,
+				A10000010000000000000013 /* WhiteboardView.swift in Sources */,
+				A10000010000000000000014 /* ColorExtensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -236,6 +244,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = WC46K49VFA;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -259,6 +268,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -299,6 +309,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = WC46K49VFA;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -315,6 +326,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -404,7 +416,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
 	};
 	rootObject = A90000010000000000000001 /* Project object */;
 }

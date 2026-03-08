@@ -19,12 +19,12 @@ struct DisplayView: View {
 
             Text(currentCard.text)
                 .font(.system(size: currentCard.fontSize, weight: .bold))
-                .foregroundColor(currentCard.theme.textColor)
+                .foregroundColor(currentCard.resolvedTextColor)
                 .minimumScaleFactor(0.05)
                 .lineLimit(5)
                 .multilineTextAlignment(.center)
                 .padding(32)
-                .modifier(GlowModifier(enabled: currentCard.glowEnabled, color: currentCard.theme.textColor))
+                .modifier(GlowModifier(enabled: currentCard.glowEnabled, color: currentCard.resolvedTextColor))
         }
         .statusBarHidden(true)
         .navigationBarHidden(true)

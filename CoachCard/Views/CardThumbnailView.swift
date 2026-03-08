@@ -11,12 +11,12 @@ struct CardThumbnailView: View {
 
             Text(card.text)
                 .font(.system(size: 24, weight: .bold))
-                .foregroundColor(card.theme.textColor)
+                .foregroundColor(card.resolvedTextColor)
                 .lineLimit(3)
                 .minimumScaleFactor(0.5)
                 .padding(12)
                 .shadow(
-                    color: card.glowEnabled ? card.theme.textColor.opacity(0.6) : .clear,
+                    color: card.glowEnabled ? card.resolvedTextColor.opacity(0.6) : .clear,
                     radius: card.glowEnabled ? 4 : 0
                 )
         }

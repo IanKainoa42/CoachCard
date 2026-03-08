@@ -11,10 +11,15 @@ struct CardEditorView: View {
     @State private var fontSize: CGFloat = 150
     @State private var theme: CardTheme = .dark
     @State private var glowEnabled: Bool = true
+    @State private var useCustomColor: Bool = false
+    @State private var customColor: Color = .white
     @State private var showDiscardAlert = false
 
     private var isEditing: Bool { card != nil }
     private var canSave: Bool { !text.trimmingCharacters(in: .whitespaces).isEmpty }
+    private var effectiveTextColor: Color {
+        useCustomColor ? customColor : theme.textColor
+    }
 
     var body: some View {
         NavigationStack {
@@ -26,11 +31,11 @@ struct CardEditorView: View {
 
                     Text(text.isEmpty ? "YOUR TEXT HERE" : text)
                         .font(.system(size: fontSize, weight: .bold))
-                        .foregroundColor(text.isEmpty ? theme.textColor.opacity(0.3) : theme.textColor)
+                        .foregroundColor(text.isEmpty ? effectiveTextColor.opacity(0.3) : effectiveTextColor)
                         .minimumScaleFactor(0.05)
                         .lineLimit(4)
                         .padding(24)
-                        .modifier(GlowModifier(enabled: glowEnabled && !text.isEmpty, color: theme.textColor))
+                        .modifier(GlowModifier(enabled: glowEnabled && !text.isEmpty, color: effectiveTextColor))
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: 280)
@@ -63,6 +68,13 @@ struct CardEditorView: View {
                             }
                         }
                         .pickerStyle(.segmented)
+                    }
+
+                    Section {
+                        Toggle("Custom Font Color", isOn: $useCustomColor)
+                        if useCustomColor {
+                            ColorPicker("Font Color", selection: $customColor, supportsOpacity: false)
+                        }
                     }
 
                     Section {
@@ -100,6 +112,10 @@ struct CardEditorView: View {
                     fontSize = card.fontSize
                     theme = card.theme
                     glowEnabled = card.glowEnabled
+                    if let hex = card.textColorHex {
+                        useCustomColor = true
+                        customColor = Color(hex: hex)
+                    }
                 }
             }
         }
@@ -107,13 +123,15 @@ struct CardEditorView: View {
 
     private func save() {
         let trimmed = text.trimmingCharacters(in: .whitespaces)
+        let colorHex = useCustomColor ? customColor.hexString : nil
         if let card {
             card.text = trimmed
             card.fontSize = fontSize
             card.theme = theme
             card.glowEnabled = glowEnabled
+            card.textColorHex = colorHex
         } else {
-            let newCard = Card(text: trimmed, fontSize: fontSize, theme: theme, glowEnabled: glowEnabled)
+            let newCard = Card(text: trimmed, fontSize: fontSize, theme: theme, glowEnabled: glowEnabled, textColorHex: colorHex)
             modelContext.insert(newCard)
         }
         dismiss()

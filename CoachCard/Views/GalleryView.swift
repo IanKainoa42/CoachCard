@@ -8,6 +8,7 @@ struct GalleryView: View {
     @State private var showingEditor = false
     @State private var editingCard: Card?
     @State private var showingScore = false
+    @State private var showingWhiteboard = false
 
     private var filteredCards: [Card] {
         if searchText.isEmpty { return cards }
@@ -52,6 +53,13 @@ struct GalleryView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
+                    showingWhiteboard = true
+                } label: {
+                    Label("Draw", systemImage: "pencil.tip.crop.circle")
+                }
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
                     showingScore = true
                 } label: {
                     Label("Score", systemImage: "number.circle")
@@ -74,6 +82,9 @@ struct GalleryView: View {
         }
         .fullScreenCover(isPresented: $showingScore) {
             ScoreView()
+        }
+        .fullScreenCover(isPresented: $showingWhiteboard) {
+            WhiteboardView()
         }
     }
 
