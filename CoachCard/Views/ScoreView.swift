@@ -7,6 +7,9 @@ struct ScoreView: View {
     @State private var previousBrightness: CGFloat = 0.5
     @State private var controlsVisible: Bool = true
     @State private var hideTimer: Timer?
+    @State private var dragOffsetAccumulator: CGFloat = 0
+
+    private let pointsPerStep: CGFloat = 22
 
     private var scoreValue: Double {
         Double(scoreIndex) / 10.0
@@ -29,6 +32,8 @@ struct ScoreView: View {
                 .lineLimit(1)
                 .padding(.horizontal, 40)
                 .modifier(GlowModifier(enabled: true, color: theme.textColor))
+                .contentShape(Rectangle())
+                .gesture(scoreScrubGesture)
 
             // Controls overlay
             VStack {
@@ -103,5 +108,28 @@ struct ScoreView: View {
         hideTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false) { _ in
             controlsVisible = false
         }
+    }
+
+    private var scoreScrubGesture: some Gesture {
+        DragGesture(minimumDistance: 4)
+            .onChanged { value in
+                let deltaY = value.translation.height - dragOffsetAccumulator
+
+                guard abs(deltaY) >= pointsPerStep else { return }
+
+                let rawSteps = Int(abs(deltaY) / pointsPerStep)
+                let direction = deltaY < 0 ? 1 : -1
+                adjustScore(by: rawSteps * direction)
+
+                dragOffsetAccumulator += CGFloat(rawSteps) * pointsPerStep * CGFloat(direction == 1 ? -1 : 1)
+            }
+            .onEnded { _ in
+                dragOffsetAccumulator = 0
+            }
+    }
+
+    private func adjustScore(by stepDelta: Int) {
+        guard stepDelta != 0 else { return }
+        scoreIndex = min(100, max(0, scoreIndex + stepDelta))
     }
 }
