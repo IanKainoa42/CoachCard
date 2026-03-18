@@ -3,7 +3,7 @@ import SwiftData
 
 @Model
 final class Card {
-    var id: UUID
+    @Attribute(.unique) var id: UUID
     var text: String
     var fontSize: CGFloat
     var themeRaw: String

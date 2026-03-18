@@ -1,6 +1,8 @@
 import SwiftUI
 
-enum CardTheme: String, Codable, CaseIterable {
+enum CardTheme: String, Codable, CaseIterable, Identifiable {
+    var id: String { rawValue }
+
     case dark
     case light
     case gray
