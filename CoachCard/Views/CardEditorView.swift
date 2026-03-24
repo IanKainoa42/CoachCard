@@ -4,8 +4,10 @@ import SwiftData
 struct CardEditorView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Query(sort: \CardFolder.sortOrder) private var folders: [CardFolder]
 
     var card: Card?
+    var initialFolder: CardFolder?
 
     @State private var text: String = ""
     @State private var fontSize: CGFloat = 150
@@ -14,6 +16,7 @@ struct CardEditorView: View {
     @State private var useCustomColor: Bool = false
     @State private var customColor: Color = .white
     @State private var showDiscardAlert = false
+    @State private var selectedFolder: CardFolder?
 
     private var isEditing: Bool { card != nil }
     private var canSave: Bool { !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
@@ -24,7 +27,7 @@ struct CardEditorView: View {
         useCustomColor ? customColor : theme.textColor
     }
     private var initialState: EditorState {
-        EditorState(card: card)
+        EditorState(card: card, initialFolder: initialFolder)
     }
     private var editorState: EditorState {
         EditorState(
@@ -33,7 +36,8 @@ struct CardEditorView: View {
             theme: theme,
             glowEnabled: glowEnabled,
             useCustomColor: useCustomColor,
-            customColorHex: useCustomColor ? customColor.hexString : theme.textColor.hexString
+            customColorHex: useCustomColor ? customColor.hexString : theme.textColor.hexString,
+            folderID: selectedFolder?.id
         )
     }
 
@@ -108,6 +112,15 @@ struct CardEditorView: View {
                     Section {
                         Toggle("Glow Effect", isOn: $glowEnabled)
                     }
+
+                    Section {
+                        Picker("Folder", selection: $selectedFolder) {
+                            Text("None").tag(nil as CardFolder?)
+                            ForEach(folders) { folder in
+                                Text(folder.name).tag(folder as CardFolder?)
+                            }
+                        }
+                    }
                 }
             }
             .navigationTitle(isEditing ? "Edit Card" : "New Card")
@@ -154,6 +167,7 @@ struct CardEditorView: View {
             card.theme = theme
             card.glowEnabled = glowEnabled
             card.textColorHex = colorHex
+            card.folder = selectedFolder
         } else {
             let newCard = Card(
                 text: trimmed,
@@ -163,13 +177,17 @@ struct CardEditorView: View {
                 textColorHex: colorHex,
                 sortOrder: nextSortOrder()
             )
+            newCard.folder = selectedFolder
             modelContext.insert(newCard)
         }
         dismiss()
     }
 
     private func loadState() {
-        guard let card else { return }
+        guard let card else {
+            selectedFolder = initialFolder
+            return
+        }
         text = card.text
         fontSize = card.fontSize
         theme = card.theme
@@ -181,6 +199,7 @@ struct CardEditorView: View {
             useCustomColor = false
             customColor = card.theme.textColor
         }
+        selectedFolder = card.folder
     }
 
     private func nextSortOrder() -> Int {
@@ -199,6 +218,7 @@ private struct EditorState: Equatable {
     let glowEnabled: Bool
     let useCustomColor: Bool
     let customColorHex: String
+    let folderID: UUID?
 
     init(
         text: String = "",
@@ -206,7 +226,8 @@ private struct EditorState: Equatable {
         theme: CardTheme = .dark,
         glowEnabled: Bool = true,
         useCustomColor: Bool = false,
-        customColorHex: String = Color.white.hexString
+        customColorHex: String = Color.white.hexString,
+        folderID: UUID? = nil
     ) {
         self.text = text
         self.fontSize = fontSize
@@ -214,11 +235,12 @@ private struct EditorState: Equatable {
         self.glowEnabled = glowEnabled
         self.useCustomColor = useCustomColor
         self.customColorHex = customColorHex
+        self.folderID = folderID
     }
 
-    init(card: Card?) {
+    init(card: Card?, initialFolder: CardFolder? = nil) {
         guard let card else {
-            self.init()
+            self.init(folderID: initialFolder?.id)
             return
         }
 
@@ -228,7 +250,8 @@ private struct EditorState: Equatable {
             theme: card.theme,
             glowEnabled: card.glowEnabled,
             useCustomColor: card.textColorHex != nil,
-            customColorHex: card.textColorHex ?? card.theme.textColor.hexString
+            customColorHex: card.textColorHex ?? card.theme.textColor.hexString,
+            folderID: card.folder?.id
         )
     }
 }

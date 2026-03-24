@@ -4,7 +4,7 @@ import SwiftData
 @main
 struct CoachCardApp: App {
     var sharedModelContainer: ModelContainer = {
-        let schema = Schema([Card.self])
+        let schema = Schema([Card.self, CardFolder.self])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])
