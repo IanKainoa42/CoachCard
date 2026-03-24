@@ -44,21 +44,27 @@ struct CardEditorView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Live preview
+                // WYSIWYG preview
                 ZStack {
                     RoundedRectangle(cornerRadius: 16)
                         .fill(theme.backgroundColor)
 
-                    Text(text.isEmpty ? "YOUR TEXT HERE" : text)
-                        .font(.system(size: fontSize, weight: .bold))
-                        .foregroundColor(text.isEmpty ? effectiveTextColor.opacity(0.3) : effectiveTextColor)
-                        .minimumScaleFactor(0.05)
-                        .lineLimit(4)
-                        .padding(24)
-                        .modifier(GlowModifier(enabled: glowEnabled && !text.isEmpty, color: effectiveTextColor))
+                    GeometryReader { geo in
+                        let scale = geo.size.width / UIScreen.main.bounds.width
+
+                        Text(text.isEmpty ? "YOUR TEXT HERE" : text)
+                            .font(.system(size: fontSize * scale, weight: .bold))
+                            .foregroundColor(text.isEmpty ? effectiveTextColor.opacity(0.3) : effectiveTextColor)
+                            .minimumScaleFactor(0.05)
+                            .lineLimit(5)
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .padding(32 * scale)
+                            .modifier(GlowModifier(enabled: glowEnabled && !text.isEmpty, color: effectiveTextColor))
+                    }
                 }
-                .frame(maxWidth: .infinity)
-                .frame(height: 280)
+                .aspectRatio(UIScreen.main.bounds.size, contentMode: .fit)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
                 .padding()
 
                 // Controls
