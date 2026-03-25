@@ -3,7 +3,21 @@ import SwiftData
 
 struct GalleryView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Card.sortOrder) private var cards: [Card]
+    @Query private var cards: [Card]
+
+    var folder: CardFolder?
+
+    init(folder: CardFolder? = nil) {
+        self.folder = folder
+
+        let folderID = folder?.id
+        let predicate = #Predicate<Card> { card in
+            card.folder?.id == folderID
+        }
+
+        _cards = Query(filter: predicate, sort: \Card.sortOrder)
+    }
+
     @State private var searchText = ""
     @State private var showingEditor = false
     @State private var editingCard: Card?
@@ -50,8 +64,8 @@ struct GalleryView: View {
                 .searchable(text: $searchText, prompt: "Search cards")
             }
         }
-        .navigationTitle("CoachCard")
-        .fullScreenCover(item: $displayingCard) { card in
+        .navigationTitle(folder?.name ?? "All Cards")
+        .navigationDestination(for: Card.self) { card in
             DisplayView(cards: filteredCards, initialCard: card)
         }
         .toolbar {
@@ -79,7 +93,7 @@ struct GalleryView: View {
             }
         }
         .sheet(isPresented: $showingEditor) {
-            CardEditorView()
+            CardEditorView(initialFolder: folder)
         }
         .sheet(item: $editingCard) { card in
             CardEditorView(card: card)
