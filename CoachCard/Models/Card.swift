@@ -12,6 +12,7 @@ final class Card {
     var createdAt: Date
     var lastUsedAt: Date
     var sortOrder: Int
+    var folder: CardFolder?
 
     var theme: CardTheme {
         get { CardTheme(rawValue: themeRaw) ?? .dark }
@@ -42,5 +43,6 @@ final class Card {
         self.createdAt = Date()
         self.lastUsedAt = Date()
         self.sortOrder = sortOrder
+        self.folder = nil
     }
 }

@@ -4,10 +4,16 @@ import SwiftData
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @AppStorage("hasSeededData") private var hasSeededData = false
+    @State private var selectedFolder: CardFolder?
 
     var body: some View {
-        NavigationStack {
-            GalleryView()
+        NavigationSplitView {
+            FolderListView(selectedFolder: $selectedFolder)
+        } detail: {
+            NavigationStack {
+                GalleryView(folder: selectedFolder)
+                    .id(selectedFolder?.id)
+            }
         }
         .onAppear {
             seedDataIfNeeded()
