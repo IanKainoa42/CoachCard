@@ -28,8 +28,6 @@ struct DisplayView: View {
                     .modifier(GlowModifier(enabled: currentCard.glowEnabled, color: currentCard.resolvedTextColor))
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .statusBarHidden(true)
-            .navigationBarHidden(true)
             .onTapGesture {
                 dismiss()
             }
@@ -55,7 +53,10 @@ struct DisplayView: View {
             )
         }
         .ignoresSafeArea()
+        .statusBarHidden(true)
+        .persistentSystemOverlays(.hidden)
         .onAppear {
+            UIApplication.shared.isIdleTimerDisabled = true
             if let idx = cards.firstIndex(where: { $0.id == initialCard.id }) {
                 currentIndex = idx
             }
@@ -64,6 +65,7 @@ struct DisplayView: View {
             updateLastUsed()
         }
         .onDisappear {
+            UIApplication.shared.isIdleTimerDisabled = false
             UIScreen.main.brightness = previousBrightness
         }
     }

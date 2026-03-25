@@ -23,6 +23,7 @@ struct GalleryView: View {
     @State private var editingCard: Card?
     @State private var showingScore = false
     @State private var showingWhiteboard = false
+    @State private var displayingCard: Card?
 
     private var filteredCards: [Card] {
         if searchText.isEmpty { return cards }
@@ -39,9 +40,12 @@ struct GalleryView: View {
                 ScrollView {
                     LazyVGrid(columns: columns, spacing: 16) {
                         ForEach(filteredCards) { card in
-                            NavigationLink(value: card) {
+                            Button {
+                                displayingCard = card
+                            } label: {
                                 CardThumbnailView(card: card)
                             }
+                            .buttonStyle(.plain)
                             .contextMenu {
                                 Button("Edit") {
                                     editingCard = card
