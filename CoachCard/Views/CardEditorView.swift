@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import PencilKit
 
 struct CardEditorView: View {
     @Environment(\.modelContext) private var modelContext
@@ -9,117 +10,165 @@ struct CardEditorView: View {
     var card: Card?
     var initialFolder: CardFolder?
 
-    @State private var text: String = ""
-    @State private var fontSize: CGFloat = 150
+    @StateObject private var richTextController = RichTextEditorController()
+    @StateObject private var drawingController = CardDrawingCanvasController()
     @State private var theme: CardTheme = .dark
     @State private var glowEnabled: Bool = true
-    @State private var useCustomColor: Bool = false
-    @State private var customColor: Color = .white
+    @State private var drawingTool: CardDrawingTool = .draw
+    @State private var drawingColor: Color = .white
+    @State private var drawingWidth: CGFloat = 8
     @State private var showDiscardAlert = false
     @State private var selectedFolder: CardFolder?
 
     private var isEditing: Bool { card != nil }
-    private var canSave: Bool { !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
-    private var hasUnsavedChanges: Bool {
-        editorState != initialState
+    private var trimmedPlainText: String {
+        richTextController.plainText.trimmingCharacters(in: .whitespacesAndNewlines)
     }
-    private var effectiveTextColor: Color {
-        useCustomColor ? customColor : theme.textColor
+    private var canSave: Bool { !trimmedPlainText.isEmpty }
+    private var hasEditorContent: Bool {
+        richTextController.attributedText.length > 0
+            || drawingController.hasDrawing
+            || theme != .dark
+            || !glowEnabled
     }
-    private var initialState: EditorState {
-        EditorState(card: card, initialFolder: initialFolder)
+    private var previewGlowColor: Color {
+        Color(richTextController.attributedText.cardPrimaryColor(fallback: UIColor(theme.textColor)))
     }
-    private var editorState: EditorState {
-        EditorState(
-            text: text,
-            fontSize: fontSize,
-            theme: theme,
-            glowEnabled: glowEnabled,
-            useCustomColor: useCustomColor,
-            customColorHex: useCustomColor ? customColor.hexString : theme.textColor.hexString,
-            folderID: selectedFolder?.id
+    private var selectedTextColor: Binding<Color> {
+        Binding(
+            get: { Color(richTextController.selectedStyle.color) },
+            set: { richTextController.applyTextColor(UIColor($0)) }
+        )
+    }
+    private var selectedFontSize: Binding<Double> {
+        Binding(
+            get: { Double(richTextController.selectedStyle.fontSize) },
+            set: { richTextController.applyFontSize(CGFloat($0)) }
         )
     }
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // WYSIWYG preview
-                ZStack {
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(theme.backgroundColor)
-
-                    GeometryReader { geo in
-                        let scale = geo.size.width / UIScreen.main.bounds.width
-
-                        Text(text.isEmpty ? "YOUR TEXT HERE" : text)
-                            .font(.system(size: fontSize * scale, weight: .bold))
-                            .foregroundColor(text.isEmpty ? effectiveTextColor.opacity(0.3) : effectiveTextColor)
-                            .minimumScaleFactor(0.05)
-                            .lineLimit(5)
-                            .multilineTextAlignment(.center)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .padding(32 * scale)
-                            .modifier(GlowModifier(enabled: glowEnabled && !text.isEmpty, color: effectiveTextColor))
-                    }
-                }
+                CardCanvasView(
+                    attributedText: richTextController.attributedText,
+                    theme: theme,
+                    glowEnabled: glowEnabled,
+                    glowColor: previewGlowColor,
+                    drawingData: nil,
+                    drawingCanvasSize: drawingController.canvasSize,
+                    placeholderText: "YOUR TEXT HERE",
+                    placeholderFontSize: max(richTextController.selectedStyle.fontSize, 48),
+                    drawingController: drawingController,
+                    drawingEnabled: true
+                )
                 .aspectRatio(UIScreen.main.bounds.size, contentMode: .fit)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
                 .padding()
 
-                // Controls
                 Form {
-                    Section {
-                        TextEditor(text: $text)
-                            .font(.title2.weight(.bold))
-                            .frame(minHeight: 120)
-                            .scrollContentBackground(.hidden)
-                            .textInputAutocapitalization(.characters)
-                            .autocorrectionDisabled()
-                            .overlay(alignment: .topLeading) {
-                                if text.isEmpty {
-                                    Text("TYPE YOUR MESSAGE")
-                                        .font(.title2.weight(.bold))
-                                        .foregroundStyle(.tertiary)
-                                        .padding(.horizontal, 5)
-                                        .padding(.vertical, 8)
-                                }
-                            }
-                    }
-
-                    Section {
-                        VStack(alignment: .leading) {
-                            HStack {
-                                Text("Size")
-                                Spacer()
-                                Text("\(Int(fontSize))")
+                    Section("Message") {
+                        ZStack(alignment: .topLeading) {
+                            if richTextController.plainText.isEmpty {
+                                Text("TYPE YOUR MESSAGE")
                                     .foregroundStyle(.secondary)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 10)
                             }
-                            Slider(value: $fontSize, in: 48...300, step: 1)
+
+                            RichTextEditorView(controller: richTextController)
+                                .frame(minHeight: 160)
                         }
                     }
 
-                    Section {
+                    Section("Formatting") {
+                        HStack(spacing: 12) {
+                            formattingButton(
+                                "Bold",
+                                systemImage: "bold",
+                                isActive: richTextController.selectedStyle.isBold
+                            ) {
+                                richTextController.toggleBold()
+                            }
+
+                            formattingButton(
+                                "Underline",
+                                systemImage: "underline",
+                                isActive: richTextController.selectedStyle.isUnderlined
+                            ) {
+                                richTextController.toggleUnderline()
+                            }
+                        }
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text("Font Size")
+                                Spacer()
+                                Text("\(Int(richTextController.selectedStyle.fontSize))")
+                                    .foregroundStyle(.secondary)
+                            }
+
+                            Slider(value: selectedFontSize, in: 48...300, step: 1)
+                        }
+
+                        ColorPicker("Text Color", selection: selectedTextColor, supportsOpacity: false)
+                    }
+
+                    Section("Card") {
                         Picker("Theme", selection: $theme) {
-                            ForEach(CardTheme.allCases, id: \.self) { t in
-                                Text(t.displayName).tag(t)
+                            ForEach(CardTheme.allCases, id: \.self) { currentTheme in
+                                Text(currentTheme.displayName).tag(currentTheme)
                             }
                         }
                         .pickerStyle(.segmented)
-                    }
 
-                    Section {
-                        Toggle("Custom Font Color", isOn: $useCustomColor)
-                        if useCustomColor {
-                            ColorPicker("Font Color", selection: $customColor, supportsOpacity: false)
-                        }
-                    }
-
-                    Section {
                         Toggle("Glow Effect", isOn: $glowEnabled)
                     }
 
-                    Section {
+                    Section("Draw On Top") {
+                        Picker("Tool", selection: $drawingTool) {
+                            ForEach(CardDrawingTool.allCases) { tool in
+                                Text(tool.title).tag(tool)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+
+                        if drawingTool == .draw {
+                            ColorPicker("Marker Color", selection: $drawingColor, supportsOpacity: false)
+
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack {
+                                    Text("Marker Width")
+                                    Spacer()
+                                    Text("\(Int(drawingWidth))")
+                                        .foregroundStyle(.secondary)
+                                }
+
+                                Slider(value: $drawingWidth, in: 2...30, step: 1)
+                            }
+                        }
+
+                        HStack {
+                            Button("Undo") {
+                                drawingController.undo()
+                            }
+                            .disabled(!drawingController.canUndo)
+
+                            Button("Redo") {
+                                drawingController.redo()
+                            }
+                            .disabled(!drawingController.canRedo)
+
+                            Spacer()
+
+                            Button("Clear", role: .destructive) {
+                                drawingController.clear()
+                            }
+                            .disabled(!drawingController.hasDrawing)
+                        }
+                    }
+
+                    Section("Folder") {
                         Picker("Folder", selection: $selectedFolder) {
                             Text("None").tag(nil as CardFolder?)
                             ForEach(folders) { folder in
@@ -134,13 +183,14 @@ struct CardEditorView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
-                        if hasUnsavedChanges {
+                        if hasEditorContent {
                             showDiscardAlert = true
                         } else {
                             dismiss()
                         }
                     }
                 }
+
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         save()
@@ -153,59 +203,110 @@ struct CardEditorView: View {
                 Button("Keep Editing", role: .cancel) {}
                 Button("Discard", role: .destructive) { dismiss() }
             }
-            .interactiveDismissDisabled(hasUnsavedChanges)
+            .interactiveDismissDisabled(hasEditorContent)
             .onAppear {
-                loadState()
+                loadCardState()
+                updateDrawingTool()
+            }
+            .onChange(of: theme) {
+                richTextController.updateFallbackColor(UIColor(theme.textColor))
+            }
+            .onChange(of: drawingTool) {
+                updateDrawingTool()
+            }
+            .onChange(of: drawingColor) {
+                if drawingTool == .draw {
+                    updateDrawingTool()
+                }
+            }
+            .onChange(of: drawingWidth) {
+                if drawingTool == .draw {
+                    updateDrawingTool()
+                }
             }
         }
     }
 
-    private func save() {
-        let trimmed = text
-            .components(separatedBy: .newlines)
-            .map { $0.trimmingCharacters(in: .whitespaces) }
-            .joined(separator: "\n")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        let colorHex = useCustomColor ? customColor.hexString : nil
-        if let card {
-            card.text = trimmed
-            card.fontSize = fontSize
-            card.theme = theme
-            card.glowEnabled = glowEnabled
-            card.textColorHex = colorHex
-            card.folder = selectedFolder
-        } else {
-            let newCard = Card(
-                text: trimmed,
-                fontSize: fontSize,
-                theme: theme,
-                glowEnabled: glowEnabled,
-                textColorHex: colorHex,
-                sortOrder: nextSortOrder()
-            )
-            newCard.folder = selectedFolder
-            modelContext.insert(newCard)
+    private func formattingButton(
+        _ title: String,
+        systemImage: String,
+        isActive: Bool,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Label(title, systemImage: systemImage)
+                .frame(maxWidth: .infinity)
         }
-        dismiss()
+        .buttonStyle(.borderedProminent)
+        .tint(isActive ? .accentColor : .secondary.opacity(0.25))
     }
 
-    private func loadState() {
-        guard let card else {
-            selectedFolder = initialFolder
-            return
-        }
-        text = card.text
-        fontSize = card.fontSize
-        theme = card.theme
-        glowEnabled = card.glowEnabled
-        if let hex = card.textColorHex {
-            useCustomColor = true
-            customColor = Color(hex: hex)
+    private func loadCardState() {
+        if let card {
+            theme = card.theme
+            glowEnabled = card.glowEnabled
+            selectedFolder = card.folder
+
+            richTextController.load(
+                attributedText: card.richTextContent,
+                fallbackFontSize: card.fontSize,
+                fallbackColor: UIColor(card.resolvedTextColor)
+            )
+            drawingController.load(drawingData: card.persistedDrawingData)
+            drawingColor = card.richTextPrimaryColor
         } else {
-            useCustomColor = false
-            customColor = card.theme.textColor
+            selectedFolder = initialFolder
+            richTextController.load(
+                attributedText: NSAttributedString(string: ""),
+                fallbackFontSize: 150,
+                fallbackColor: UIColor(theme.textColor)
+            )
+            drawingController.load(drawingData: nil)
+            drawingColor = theme.textColor
         }
-        selectedFolder = card.folder
+    }
+
+    private func updateDrawingTool() {
+        switch drawingTool {
+        case .draw:
+            drawingController.setTool(
+                PKInkingTool(.marker, color: UIColor(drawingColor), width: drawingWidth)
+            )
+        case .erase:
+            drawingController.setTool(PKEraserTool(.bitmap))
+        }
+    }
+
+    private func save() {
+        let normalizedText = richTextController.attributedText.cardNormalized(
+            fallbackFontSize: richTextController.selectedStyle.fontSize,
+            fallbackColor: UIColor(theme.textColor)
+        )
+        let primaryColor = normalizedText.cardPrimaryColor(fallback: UIColor(theme.textColor))
+        let drawingSize = drawingController.canvasSize
+
+        let targetCard: Card
+        if let card {
+            targetCard = card
+        } else {
+            let newCard = Card(text: trimmedPlainText, sortOrder: nextSortOrder())
+            modelContext.insert(newCard)
+            targetCard = newCard
+        }
+
+        targetCard.text = trimmedPlainText
+        targetCard.fontSize = richTextController.selectedStyle.fontSize
+        targetCard.theme = theme
+        targetCard.glowEnabled = glowEnabled
+        targetCard.textColorHex = Color(primaryColor).hexString
+        targetCard.attributedTextData = normalizedText.cardRTFData()
+        targetCard.drawingData = drawingController.serializedDrawingData()
+        targetCard.drawingCanvasWidth = drawingSize.width > 0 ? Double(drawingSize.width) : nil
+        targetCard.drawingCanvasHeight = drawingSize.height > 0 ? Double(drawingSize.height) : nil
+        targetCard.folder = selectedFolder
+        CardArtboardStore.delete(for: targetCard.id)
+
+        dismiss()
     }
 
     private func nextSortOrder() -> Int {
@@ -217,47 +318,18 @@ struct CardEditorView: View {
     }
 }
 
-private struct EditorState: Equatable {
-    let text: String
-    let fontSize: CGFloat
-    let theme: CardTheme
-    let glowEnabled: Bool
-    let useCustomColor: Bool
-    let customColorHex: String
-    let folderID: UUID?
+private enum CardDrawingTool: String, CaseIterable, Identifiable {
+    case draw
+    case erase
 
-    init(
-        text: String = "",
-        fontSize: CGFloat = 150,
-        theme: CardTheme = .dark,
-        glowEnabled: Bool = true,
-        useCustomColor: Bool = false,
-        customColorHex: String = Color.white.hexString,
-        folderID: UUID? = nil
-    ) {
-        self.text = text
-        self.fontSize = fontSize
-        self.theme = theme
-        self.glowEnabled = glowEnabled
-        self.useCustomColor = useCustomColor
-        self.customColorHex = customColorHex
-        self.folderID = folderID
-    }
+    var id: String { rawValue }
 
-    init(card: Card?, initialFolder: CardFolder? = nil) {
-        guard let card else {
-            self.init(folderID: initialFolder?.id)
-            return
+    var title: String {
+        switch self {
+        case .draw:
+            return "Draw"
+        case .erase:
+            return "Erase"
         }
-
-        self.init(
-            text: card.text,
-            fontSize: card.fontSize,
-            theme: card.theme,
-            glowEnabled: card.glowEnabled,
-            useCustomColor: card.textColorHex != nil,
-            customColorHex: card.textColorHex ?? card.theme.textColor.hexString,
-            folderID: card.folder?.id
-        )
     }
 }

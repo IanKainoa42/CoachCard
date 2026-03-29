@@ -54,6 +54,7 @@ struct GalleryView: View {
                                     moveToTop(card)
                                 }
                                 Button("Delete", role: .destructive) {
+                                    CardArtboardStore.delete(for: card.id)
                                     modelContext.delete(card)
                                 }
                             }

@@ -4,22 +4,16 @@ struct CardThumbnailView: View {
     let card: Card
 
     var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 16)
-                .fill(card.theme.backgroundColor)
-                .shadow(color: .black.opacity(0.2), radius: 4, y: 2)
-
-            Text(card.text)
-                .font(.system(size: 24, weight: .bold))
-                .foregroundColor(card.resolvedTextColor)
-                .lineLimit(3)
-                .minimumScaleFactor(0.5)
-                .padding(12)
-                .shadow(
-                    color: card.glowEnabled ? card.resolvedTextColor.opacity(0.6) : .clear,
-                    radius: card.glowEnabled ? 4 : 0
-                )
-        }
+        CardCanvasView(
+            attributedText: card.richTextContent,
+            theme: card.theme,
+            glowEnabled: card.glowEnabled,
+            glowColor: card.richTextPrimaryColor,
+            drawingData: card.persistedDrawingData,
+            drawingCanvasSize: card.storedDrawingCanvasSize
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: .black.opacity(0.2), radius: 4, y: 2)
         .aspectRatio(1.2, contentMode: .fit)
     }
 }

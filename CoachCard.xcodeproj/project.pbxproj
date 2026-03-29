@@ -21,6 +21,7 @@
 		A10000010000000000000012 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000012 /* Preview Assets.xcassets */; };
 		A10000010000000000000013 /* WhiteboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000013 /* WhiteboardView.swift */; };
 		A10000010000000000000014 /* ColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000014 /* ColorExtensions.swift */; };
+		A10000010000000000000015 /* CardContentSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000015 /* CardContentSupport.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +39,7 @@
 		A20000010000000000000012 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		A20000010000000000000013 /* WhiteboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhiteboardView.swift; sourceTree = "<group>"; };
 		A20000010000000000000014 /* ColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtensions.swift; sourceTree = "<group>"; };
+		A20000010000000000000015 /* CardContentSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardContentSupport.swift; sourceTree = "<group>"; };
 		A30000010000000000000001 /* CoachCard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CoachCard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -101,6 +103,7 @@
 			children = (
 				A20000010000000000000010 /* GlowModifier.swift */,
 				A20000010000000000000014 /* ColorExtensions.swift */,
+				A20000010000000000000015 /* CardContentSupport.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -203,6 +206,7 @@
 				A10000010000000000000010 /* GlowModifier.swift in Sources */,
 				A10000010000000000000013 /* WhiteboardView.swift in Sources */,
 				A10000010000000000000014 /* ColorExtensions.swift in Sources */,
+				A10000010000000000000015 /* CardContentSupport.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

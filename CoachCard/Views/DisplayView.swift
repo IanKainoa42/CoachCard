@@ -14,19 +14,14 @@ struct DisplayView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            ZStack {
-                currentCard.theme.backgroundColor
-                    .ignoresSafeArea()
-
-                Text(currentCard.text)
-                    .font(.system(size: currentCard.fontSize, weight: .bold))
-                    .foregroundColor(currentCard.resolvedTextColor)
-                    .minimumScaleFactor(0.05)
-                    .lineLimit(5)
-                    .multilineTextAlignment(.center)
-                    .padding(32)
-                    .modifier(GlowModifier(enabled: currentCard.glowEnabled, color: currentCard.resolvedTextColor))
-            }
+            CardCanvasView(
+                attributedText: currentCard.richTextContent,
+                theme: currentCard.theme,
+                glowEnabled: currentCard.glowEnabled,
+                glowColor: currentCard.richTextPrimaryColor,
+                drawingData: currentCard.persistedDrawingData,
+                drawingCanvasSize: currentCard.storedDrawingCanvasSize
+            )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .onTapGesture {
                 dismiss()
@@ -44,16 +39,15 @@ struct DisplayView: View {
 
                         if value.translation.width < -50, currentIndex < cards.count - 1 {
                             currentIndex += 1
-                            updateLastUsed()
                         } else if value.translation.width > 50, currentIndex > 0 {
                             currentIndex -= 1
-                            updateLastUsed()
                         }
                     }
             )
         }
         .ignoresSafeArea()
         .statusBarHidden(true)
+        .navigationBarHidden(true)
         .persistentSystemOverlays(.hidden)
         .onAppear {
             UIApplication.shared.isIdleTimerDisabled = true
@@ -62,15 +56,22 @@ struct DisplayView: View {
             }
             previousBrightness = UIScreen.main.brightness
             UIScreen.main.brightness = 1.0
-            updateLastUsed()
         }
         .onDisappear {
             UIApplication.shared.isIdleTimerDisabled = false
             UIScreen.main.brightness = previousBrightness
         }
-    }
+        .task(id: currentCard.id) {
+            let card = currentCard
 
-    private func updateLastUsed() {
-        currentCard.lastUsedAt = Date()
+            do {
+                try await Task.sleep(for: .milliseconds(250))
+            } catch {
+                return
+            }
+
+            guard !Task.isCancelled else { return }
+            card.lastUsedAt = Date()
+        }
     }
 }
