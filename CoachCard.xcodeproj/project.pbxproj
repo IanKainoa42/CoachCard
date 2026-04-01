@@ -22,6 +22,8 @@
 		A10000010000000000000013 /* WhiteboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000013 /* WhiteboardView.swift */; };
 		A10000010000000000000014 /* ColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000014 /* ColorExtensions.swift */; };
 		A10000010000000000000015 /* CardContentSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000015 /* CardContentSupport.swift */; };
+		A10000010000000000000020 /* CardFolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000020 /* CardFolder.swift */; };
+		A10000010000000000000021 /* FolderListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000021 /* FolderListView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,6 +42,8 @@
 		A20000010000000000000013 /* WhiteboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhiteboardView.swift; sourceTree = "<group>"; };
 		A20000010000000000000014 /* ColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtensions.swift; sourceTree = "<group>"; };
 		A20000010000000000000015 /* CardContentSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardContentSupport.swift; sourceTree = "<group>"; };
+		A20000010000000000000020 /* CardFolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardFolder.swift; sourceTree = "<group>"; };
+		A20000010000000000000021 /* FolderListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderListView.swift; sourceTree = "<group>"; };
 		A30000010000000000000001 /* CoachCard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CoachCard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -79,6 +83,7 @@
 			isa = PBXGroup;
 			children = (
 				A20000010000000000000003 /* Card.swift */,
+				A20000010000000000000020 /* CardFolder.swift */,
 				A20000010000000000000004 /* CardTheme.swift */,
 			);
 			path = Models;
@@ -92,6 +97,7 @@
 				A20000010000000000000006 /* CardThumbnailView.swift */,
 				A20000010000000000000007 /* CardEditorView.swift */,
 				A20000010000000000000008 /* DisplayView.swift */,
+				A20000010000000000000021 /* FolderListView.swift */,
 				A20000010000000000000009 /* ScoreView.swift */,
 				A20000010000000000000013 /* WhiteboardView.swift */,
 			);
@@ -207,6 +213,8 @@
 				A10000010000000000000013 /* WhiteboardView.swift in Sources */,
 				A10000010000000000000014 /* ColorExtensions.swift in Sources */,
 				A10000010000000000000015 /* CardContentSupport.swift in Sources */,
+				A10000010000000000000020 /* CardFolder.swift in Sources */,
+				A10000010000000000000021 /* FolderListView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
