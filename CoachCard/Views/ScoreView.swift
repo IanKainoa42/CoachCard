@@ -6,8 +6,9 @@ struct ScoreView: View {
     @State private var theme: CardTheme = .dark
     @State private var previousBrightness: CGFloat = 0.5
     @State private var controlsVisible: Bool = true
-    @State private var hideTimer: Timer?
     @State private var dragOffsetAccumulator: CGFloat = 0
+    @State private var isScrubbing = false
+    @State private var hideControlsTask: Task<Void, Never>?
 
     private let pointsPerStep: CGFloat = 22
 
@@ -90,29 +91,45 @@ struct ScoreView: View {
         }
         .onDisappear {
             UIScreen.main.brightness = previousBrightness
-            hideTimer?.invalidate()
-        }
-        .onChange(of: scoreIndex) {
-            showControls()
+            cancelHideTask()
         }
         .animation(.easeInOut(duration: 0.3), value: controlsVisible)
     }
 
     private func showControls() {
-        controlsVisible = true
+        if !controlsVisible {
+            controlsVisible = true
+        }
+    }
+
+    private func showControlsAndScheduleHide() {
+        showControls()
         scheduleHide()
     }
 
     private func scheduleHide() {
-        hideTimer?.invalidate()
-        hideTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false) { _ in
+        cancelHideTask()
+        hideControlsTask = Task {
+            try? await Task.sleep(for: .seconds(3))
+            guard !Task.isCancelled else { return }
             controlsVisible = false
         }
+    }
+
+    private func cancelHideTask() {
+        hideControlsTask?.cancel()
+        hideControlsTask = nil
     }
 
     private var scoreScrubGesture: some Gesture {
         DragGesture(minimumDistance: 4)
             .onChanged { value in
+                if !isScrubbing {
+                    isScrubbing = true
+                    showControls()
+                    cancelHideTask()
+                }
+
                 let deltaY = value.translation.height - dragOffsetAccumulator
 
                 guard abs(deltaY) >= pointsPerStep else { return }
@@ -125,6 +142,8 @@ struct ScoreView: View {
             }
             .onEnded { _ in
                 dragOffsetAccumulator = 0
+                isScrubbing = false
+                showControlsAndScheduleHide()
             }
     }
 

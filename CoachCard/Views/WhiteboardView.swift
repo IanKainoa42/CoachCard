@@ -165,42 +165,31 @@ struct WhiteboardView: View {
 
 // MARK: - Canvas Manager (owns the PKCanvasView, avoids SwiftUI rebuild churn)
 
-final class CanvasManager: ObservableObject {
+final class CanvasManager: NSObject, ObservableObject, PKCanvasViewDelegate {
     let canvasView = PKCanvasView()
     @Published var canUndo = false
     @Published var canRedo = false
 
-    private var undoObserver: Any?
-    private var redoObserver: Any?
+    override init() {
+        super.init()
 
-    init() {
+        canvasView.delegate = self
         canvasView.drawingPolicy = .anyInput
         canvasView.isOpaque = true
         canvasView.contentInsetAdjustmentBehavior = .never
         canvasView.showsVerticalScrollIndicator = false
         canvasView.showsHorizontalScrollIndicator = false
+        canvasView.alwaysBounceVertical = false
+        canvasView.alwaysBounceHorizontal = false
         canvasView.maximumZoomScale = 1
         canvasView.minimumZoomScale = 1
         canvasView.bouncesZoom = false
-
-        // Track undo state
-        let nc = NotificationCenter.default
-        undoObserver = nc.addObserver(forName: .NSUndoManagerCheckpoint, object: nil, queue: .main) { [weak self] _ in
-            self?.updateUndoState()
-        }
-        redoObserver = nc.addObserver(forName: .NSUndoManagerDidUndoChange, object: nil, queue: .main) { [weak self] _ in
-            self?.updateUndoState()
-        }
-    }
-
-    deinit {
-        if let o = undoObserver { NotificationCenter.default.removeObserver(o) }
-        if let o = redoObserver { NotificationCenter.default.removeObserver(o) }
     }
 
     func configure(backgroundColor: UIColor, tool: PKTool) {
         canvasView.backgroundColor = backgroundColor
         canvasView.tool = tool
+        refreshUndoState()
     }
 
     func setTool(_ tool: PKTool) {
@@ -226,9 +215,24 @@ final class CanvasManager: ObservableObject {
         updateUndoState()
     }
 
+    func refreshUndoState() {
+        updateUndoState()
+    }
+
+    func canvasViewDrawingDidChange(_ canvasView: PKCanvasView) {
+        updateUndoState()
+    }
+
     private func updateUndoState() {
-        canUndo = canvasView.undoManager?.canUndo ?? false
-        canRedo = canvasView.undoManager?.canRedo ?? false
+        let nextCanUndo = canvasView.undoManager?.canUndo ?? !canvasView.drawing.strokes.isEmpty
+        let nextCanRedo = canvasView.undoManager?.canRedo ?? false
+
+        if canUndo != nextCanUndo {
+            canUndo = nextCanUndo
+        }
+        if canRedo != nextCanRedo {
+            canRedo = nextCanRedo
+        }
     }
 }
 
@@ -238,7 +242,8 @@ struct CanvasRepresentable: UIViewRepresentable {
     let manager: CanvasManager
 
     func makeUIView(context: Context) -> PKCanvasView {
-        manager.canvasView
+        manager.refreshUndoState()
+        return manager.canvasView
     }
 
     func updateUIView(_ uiView: PKCanvasView, context: Context) {

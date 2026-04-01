@@ -12,12 +12,10 @@ Replace the fixed-height preview box with a GeometryReader-based preview that ma
 
 ### Changes (CardEditorView only)
 
-1. **Replace the fixed `.frame(height: 280)` preview** with a `GeometryReader` that fills available width and computes height from the screen aspect ratio:
-   - `screenAspectRatio = screenHeight / screenWidth`
-   - `previewHeight = availableWidth * screenAspectRatio`
+1. **Replace the fixed `.frame(height: 280)` preview** with `.aspectRatio(UIScreen.main.bounds.size, contentMode: .fit)` on the preview ZStack. This matches the full screen's proportions. `UIScreen.main.bounds` is used intentionally — DisplayView renders truly full-screen (ignores safe area, hides nav/status bars), so screen size is the correct reference. Split View is out of scope (this is a full-screen coaching app).
 
-2. **Compute a scale factor:**
-   - `scale = availableWidth / screenWidth`
+2. **Compute a scale factor** via a single GeometryReader inside the preview ZStack:
+   - `scale = geo.size.width / UIScreen.main.bounds.width` (rendered preview width / full screen width)
 
 3. **Apply scale to the text rendering:**
    - Font size: `fontSize * scale`
@@ -26,8 +24,8 @@ Replace the fixed-height preview box with a GeometryReader-based preview that ma
 4. **Keep identical modifiers to DisplayView:**
    - `.minimumScaleFactor(0.05)`
    - `.lineLimit(5)` (currently preview uses 4 — match DisplayView's 5)
-   - `.multilineTextAlignment(.center)`
-   - `GlowModifier`
+   - `.multilineTextAlignment(.center)` (currently missing from preview — DisplayView has it)
+   - `GlowModifier` — shadow radii (10/20/40/60pt) are NOT scaled. The glow in the preview will appear proportionally larger than on the real display. This is acceptable; scaling shadow radii adds complexity for minimal benefit in a preview.
 
 5. **Visual treatment:** Rounded corners + clip on the preview container (it's a miniature, not an actual screen edge).
 
