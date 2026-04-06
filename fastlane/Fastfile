@@ -1,0 +1,90 @@
+default_platform(:ios)
+
+APP_IDENTIFIER = "com.ianrichardson.CoachCard"
+XCODE_PROJECT = "CoachCard.xcodeproj"
+SCHEME = "CoachCard"
+TEAM_ID = "WC46K49VFA"
+
+# App Store Connect API key loader.
+# Supports either:
+# - APP_STORE_CONNECT_API_KEY_JSON_PATH -> path to the fastlane JSON key file, or
+# - APP_STORE_CONNECT_API_KEY_CONTENT -> base64-encoded .p8 contents
+#   with APP_STORE_CONNECT_API_KEY_ID and APP_STORE_CONNECT_API_ISSUER_ID.
+def app_store_api_key
+  json_path = ENV["APP_STORE_CONNECT_API_KEY_JSON_PATH"]
+  if json_path && File.exist?(json_path)
+    return app_store_connect_api_key(
+      key_filepath: json_path,
+      duration: 1200,
+      in_house: false
+    )
+  end
+
+  key_content = ENV["APP_STORE_CONNECT_API_KEY_CONTENT"]
+  UI.user_error!("Missing App Store Connect API key. Set APP_STORE_CONNECT_API_KEY_JSON_PATH or APP_STORE_CONNECT_API_KEY_CONTENT + APP_STORE_CONNECT_API_KEY_ID + APP_STORE_CONNECT_API_ISSUER_ID.") if key_content.to_s.empty?
+
+  app_store_connect_api_key(
+    key_id: ENV.fetch("APP_STORE_CONNECT_API_KEY_ID"),
+    issuer_id: ENV.fetch("APP_STORE_CONNECT_API_ISSUER_ID"),
+    key_content: key_content,
+    is_key_content_base64: true,
+    duration: 1200,
+    in_house: false
+  )
+end
+
+platform :ios do
+  desc "Bootstrap App Store signing locally"
+  lane :bootstrap_signing do
+    match(
+      type: "appstore",
+      app_identifier: [APP_IDENTIFIER],
+      team_id: TEAM_ID,
+      readonly: false
+    )
+  end
+
+  desc "Run local tests"
+  lane :test do
+    run_tests(
+      project: XCODE_PROJECT,
+      scheme: SCHEME,
+      device: "iPad Pro (13-inch) (M4)",
+      clean: true
+    )
+  end
+
+  desc "Build and upload CoachCard to TestFlight"
+  lane :beta do
+    setup_ci
+
+    match(
+      type: "appstore",
+      app_identifier: [APP_IDENTIFIER],
+      team_id: TEAM_ID,
+      readonly: ENV.fetch("MATCH_READONLY", "true") == "true"
+    )
+
+    build_number = (ENV["GITHUB_RUN_NUMBER"] || Time.now.strftime("%Y%m%d%H%M")).to_s
+    increment_build_number(
+      build_number: build_number,
+      xcodeproj: XCODE_PROJECT
+    )
+
+    build_app(
+      project: XCODE_PROJECT,
+      scheme: SCHEME,
+      export_method: "app-store",
+      clean: true,
+      output_directory: "./build",
+      output_name: "CoachCard"
+    )
+
+    upload_to_testflight(
+      api_key: app_store_api_key,
+      skip_waiting_for_build_processing: true,
+      distribute_external: false,
+      groups: ENV["TESTFLIGHT_GROUPS"]&.split(",") || []
+    )
+  end
+end

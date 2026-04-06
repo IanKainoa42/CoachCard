@@ -1,0 +1,11 @@
+# Matchfile - code signing configuration for CoachCard
+# Uses the shared/team certificate repo pattern from FormationFlow.
+
+storage_mode("git")
+
+git_url(ENV.fetch("MATCH_GIT_URL", "git@github.com:IanKainoa42/formation-flow-certificates.git"))
+
+type("appstore")
+
+app_identifier(["com.ianrichardson.CoachCard"])
+team_id("WC46K49VFA")

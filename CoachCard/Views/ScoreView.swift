@@ -11,6 +11,7 @@ struct ScoreView: View {
     @State private var hideControlsTask: Task<Void, Never>?
 
     private let pointsPerStep: CGFloat = 22
+    private let fastThreshold: CGFloat = 80
 
     private var scoreValue: Double {
         Double(scoreIndex) / 10.0
@@ -25,21 +26,19 @@ struct ScoreView: View {
             theme.backgroundColor
                 .ignoresSafeArea()
 
-            // Score number
+            // Score number — fills the screen
             Text(scoreText)
-                .font(.system(size: 300, weight: .bold))
+                .font(.system(size: 500, weight: .bold))
                 .foregroundColor(theme.textColor)
                 .minimumScaleFactor(0.1)
                 .lineLimit(1)
-                .padding(.horizontal, 40)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(.horizontal, 32)
                 .modifier(GlowModifier(enabled: true, color: theme.textColor))
-                .contentShape(Rectangle())
-                .gesture(scoreScrubGesture)
 
             // Controls overlay
             VStack {
                 HStack {
-                    // Close button
                     Button {
                         dismiss()
                     } label: {
@@ -51,7 +50,6 @@ struct ScoreView: View {
 
                     Spacer()
 
-                    // Theme picker
                     Picker("Theme", selection: $theme) {
                         ForEach(CardTheme.allCases, id: \.self) { t in
                             Text(t.displayName).tag(t)
@@ -65,22 +63,12 @@ struct ScoreView: View {
                 .padding(.top, 20)
 
                 Spacer()
-
-                // Score picker
-                Picker("Score", selection: $scoreIndex) {
-                    ForEach(0...100, id: \.self) { i in
-                        Text(String(format: "%.1f", Double(i) / 10.0))
-                            .tag(i)
-                    }
-                }
-                .pickerStyle(.wheel)
-                .frame(height: 80)
-                .padding(.horizontal, 40)
-                .opacity(controlsVisible ? 0.6 : 0.15)
             }
         }
         .statusBarHidden(true)
+        .persistentSystemOverlays(.hidden)
         .contentShape(Rectangle())
+        .gesture(scoreScrubGesture)
         .onTapGesture {
             showControls()
         }
@@ -134,9 +122,12 @@ struct ScoreView: View {
 
                 guard abs(deltaY) >= pointsPerStep else { return }
 
+                let speed = abs(value.velocity.height)
+                let stepSize = speed > fastThreshold ? 5 : 1
+
                 let rawSteps = Int(abs(deltaY) / pointsPerStep)
                 let direction = deltaY < 0 ? 1 : -1
-                adjustScore(by: rawSteps * direction)
+                adjustScore(by: rawSteps * stepSize * direction)
 
                 dragOffsetAccumulator += CGFloat(rawSteps) * pointsPerStep * CGFloat(direction == 1 ? -1 : 1)
             }

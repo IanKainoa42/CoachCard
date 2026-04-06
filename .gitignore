@@ -18,6 +18,12 @@ build/
 *.dSYM.zip
 *.dSYM
 
+## Signing / keys
+*.p8
+*.p12
+*.key
+*.crt
+
 ## macOS
 .DS_Store
 .AppleDouble
