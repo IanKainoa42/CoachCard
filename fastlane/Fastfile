@@ -11,17 +11,21 @@ TEAM_ID = "WC46K49VFA"
 # - APP_STORE_CONNECT_API_KEY_CONTENT -> base64-encoded .p8 contents
 #   with APP_STORE_CONNECT_API_KEY_ID and APP_STORE_CONNECT_API_ISSUER_ID.
 def app_store_api_key
-  json_path = ENV["APP_STORE_CONNECT_API_KEY_JSON_PATH"]
-  if json_path && File.exist?(json_path)
+  # Ruby 4.0 + OpenSSL 3.x breaks base64 key_content loading ("invalid curve name").
+  # Use key_filepath (path to the raw .p8 file) to avoid the issue.
+  p8_path = ENV["APP_STORE_CONNECT_API_KEY_JSON_PATH"]
+  if p8_path && File.exist?(p8_path)
     return app_store_connect_api_key(
-      key_filepath: json_path,
+      key_id: ENV.fetch("APP_STORE_CONNECT_API_KEY_ID"),
+      issuer_id: ENV.fetch("APP_STORE_CONNECT_API_ISSUER_ID"),
+      key_filepath: p8_path,
       duration: 1200,
       in_house: false
     )
   end
 
   key_content = ENV["APP_STORE_CONNECT_API_KEY_CONTENT"]
-  UI.user_error!("Missing App Store Connect API key. Set APP_STORE_CONNECT_API_KEY_JSON_PATH or APP_STORE_CONNECT_API_KEY_CONTENT + APP_STORE_CONNECT_API_KEY_ID + APP_STORE_CONNECT_API_ISSUER_ID.") if key_content.to_s.empty?
+  UI.user_error!("Missing App Store Connect API key. Set APP_STORE_CONNECT_API_KEY_JSON_PATH (path to .p8 file) plus APP_STORE_CONNECT_API_KEY_ID and APP_STORE_CONNECT_API_ISSUER_ID.") if key_content.to_s.empty?
 
   app_store_connect_api_key(
     key_id: ENV.fetch("APP_STORE_CONNECT_API_KEY_ID"),
