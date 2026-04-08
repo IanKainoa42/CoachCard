@@ -40,7 +40,8 @@ platform :ios do
       type: "appstore",
       app_identifier: [APP_IDENTIFIER],
       team_id: TEAM_ID,
-      readonly: false
+      readonly: false,
+      api_key: app_store_api_key
     )
   end
 
