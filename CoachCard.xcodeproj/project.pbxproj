@@ -24,6 +24,7 @@
 		A10000010000000000000015 /* CardContentSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000015 /* CardContentSupport.swift */; };
 		A10000010000000000000020 /* CardFolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000020 /* CardFolder.swift */; };
 		A10000010000000000000021 /* FolderListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000021 /* FolderListView.swift */; };
+		A10000010000000000000022 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000022 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +45,7 @@
 		A20000010000000000000015 /* CardContentSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardContentSupport.swift; sourceTree = "<group>"; };
 		A20000010000000000000020 /* CardFolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardFolder.swift; sourceTree = "<group>"; };
 		A20000010000000000000021 /* FolderListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderListView.swift; sourceTree = "<group>"; };
+		A20000010000000000000022 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		A30000010000000000000001 /* CoachCard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CoachCard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -74,6 +76,7 @@
 				A50000010000000000000004 /* Views */,
 				A50000010000000000000005 /* Utilities */,
 				A20000010000000000000011 /* Assets.xcassets */,
+				A20000010000000000000022 /* PrivacyInfo.xcprivacy */,
 				A50000010000000000000007 /* Preview Content */,
 			);
 			path = CoachCard;
@@ -190,6 +193,7 @@
 			files = (
 				A10000010000000000000012 /* Preview Assets.xcassets in Resources */,
 				A10000010000000000000011 /* Assets.xcassets in Resources */,
+				A10000010000000000000022 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
