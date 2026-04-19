@@ -1,5 +1,7 @@
 # CoachCard
 
+Portfolio synthesis: [/Users/ianrichardson/Knowledge-Hub/library/research/sideline-display-apps-design-pattern.md](/Users/ianrichardson/Knowledge-Hub/library/research/sideline-display-apps-design-pattern.md)
+
 Silent coaching whiteboard for iPad. Flash scores, cues, and hand-drawn messages to athletes from across the gym — no shouting required.
 
 ## What It Does
