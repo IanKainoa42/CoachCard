@@ -34,3 +34,7 @@ build/
 Packages/
 Package.pins
 Package.resolved
+
+## Fastlane generated output
+fastlane/README.md
+fastlane/report.xml
