@@ -105,6 +105,9 @@ struct GalleryView: View {
         .fullScreenCover(isPresented: $showingWhiteboard) {
             WhiteboardView()
         }
+        .fullScreenCover(item: $displayingCard) { card in
+            DisplayView(cards: filteredCards, initialCard: card)
+        }
     }
 
     private var emptyState: some View {

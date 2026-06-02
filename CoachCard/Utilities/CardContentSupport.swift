@@ -50,6 +50,7 @@ struct CardCanvasView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .padding(CardLayoutMetrics.textPadding * scale)
                         .modifier(GlowModifier(enabled: glowEnabled, color: glowColor))
+                        .allowsHitTesting(false)
                 } else if let placeholderText {
                     Text(placeholderText)
                         .font(.system(size: placeholderFontSize * scale, weight: .bold))
@@ -59,11 +60,11 @@ struct CardCanvasView: View {
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .padding(CardLayoutMetrics.textPadding * scale)
+                        .allowsHitTesting(false)
                 }
 
                 if let drawingController {
                     CardDrawingCanvasRepresentable(controller: drawingController)
-                        .allowsHitTesting(drawingEnabled)
                         .onAppear {
                             drawingController.setCanvasSize(proxy.size)
                             drawingController.setDrawingEnabled(drawingEnabled)
@@ -171,6 +172,9 @@ final class CardDrawingCanvasController: NSObject, ObservableObject, PKCanvasVie
 
     func setDrawingEnabled(_ isEnabled: Bool) {
         canvasView.isUserInteractionEnabled = isEnabled
+        if isEnabled {
+            canvasView.drawingPolicy = .anyInput
+        }
     }
 
     func clear() {
