@@ -92,4 +92,89 @@ platform :ios do
       groups: ENV["TESTFLIGHT_GROUPS"]&.split(",") || []
     )
   end
+
+  # --------------------------------------------------------------------------
+  # openrsync-safe build helper (ported from FormationFlow).
+  #
+  # On this Mac, /usr/bin/rsync is openrsync, which lacks the `-E` flag Xcode's
+  # `-exportArchive` uses -> "Copy failed". So `build_app`/`gym` export is
+  # BROKEN locally. Workaround: archive normally (only export is broken), then
+  # hand-assemble + re-sign the IPA.
+  #   - Project uses Automatic signing -> archive is dev-signed; strip
+  #     get-task-allow and re-sign with the distribution cert (by SHA1, names
+  #     are ambiguous when two dist certs share a friendly name).
+  #   - App Store profile resolved by NAME (UUIDs rotate).
+  # All identifiers are PUBLIC, not secrets, and ENV-overridable.
+  # --------------------------------------------------------------------------
+  desc "Archive + hand-sign an App Store IPA without the broken -exportArchive. Returns IPA path."
+  private_lane :build_signed_ipa do
+    scheme    = ENV["SHIP_SCHEME"] || SCHEME
+    cert_sha1 = ENV["SHIP_DIST_CERT_SHA1"] || "910B65DB392314A8F3FE252F5A8BB096D566FBB1"
+    prof_name = ENV["SHIP_APPSTORE_PROFILE_NAME"] || "match AppStore #{APP_IDENTIFIER}"
+
+    repo    = File.expand_path("..", __dir__)
+    project = File.join(repo, "#{scheme}.xcodeproj")
+    work    = "/tmp/#{scheme}_ship"
+    archive = "#{work}/#{scheme}.xcarchive"
+    payload = "#{work}/Payload"
+    app     = "#{payload}/#{scheme}.app"
+    ipa     = "#{work}/#{scheme}.ipa"
+    ent     = "#{work}/entitlements.plist"
+
+    prof_dirs = [
+      File.expand_path("~/Library/Developer/Xcode/UserData/Provisioning Profiles"),
+      File.expand_path("~/Library/MobileDevice/Provisioning Profiles")
+    ]
+    profile = prof_dirs.flat_map { |d| Dir["#{d}/*.mobileprovision"] }.find do |p|
+      `security cms -D -i "#{p}" 2>/dev/null | plutil -extract Name raw - 2>/dev/null`.strip == prof_name
+    end
+    UI.user_error!("App Store profile '#{prof_name}' is not installed") if profile.nil?
+    UI.message("Using App Store profile #{File.basename(profile)} (#{prof_name})")
+
+    sh("rm -rf #{work.shellescape} && mkdir -p #{payload.shellescape}")
+
+    # 1. Archive — this works; only `-exportArchive` is broken.
+    sh("xcodebuild -project #{project.shellescape} -scheme #{scheme.shellescape} " \
+       "-configuration Release -destination 'generic/platform=iOS' " \
+       "-archivePath #{archive.shellescape} -allowProvisioningUpdates archive")
+
+    # 2. Hand-assemble + re-sign the IPA (documented openrsync workaround).
+    sh("cp -R #{"#{archive}/Products/Applications/#{scheme}.app".shellescape} #{payload.shellescape}/")
+    sh("cp #{profile.shellescape} #{"#{app}/embedded.mobileprovision".shellescape}")
+    sh("codesign -d --entitlements - --xml #{app.shellescape} > #{ent.shellescape}")
+    sh("plutil -remove get-task-allow #{ent.shellescape} || true")
+    sh("codesign --force --sign #{cert_sha1.shellescape} " \
+       "--entitlements #{ent.shellescape} --generate-entitlement-der #{app.shellescape}")
+    sh("codesign --verify --strict --verbose=2 #{app.shellescape}")
+    sh("cd #{work.shellescape} && rm -f #{"#{scheme}.ipa".shellescape} && zip -qr #{"#{scheme}.ipa".shellescape} Payload")
+
+    UI.success("Signed App Store IPA ready: #{ipa}")
+    ipa
+  end
+
+  desc "Upload an already-built IPA (ENV IPA_PATH) to TestFlight. No archive."
+  lane :tf_upload do
+    upload_to_testflight(
+      api_key: app_store_api_key,
+      ipa: ENV.fetch("IPA_PATH"),
+      skip_waiting_for_build_processing: true,
+      distribute_external: false
+    )
+  end
+
+  desc "Build + upload binary to App Store Connect. Does NOT submit. (openrsync-safe)"
+  lane :ship_upload do
+    build_number = (ENV["GITHUB_RUN_NUMBER"] || Time.now.strftime("%Y%m%d%H%M")).to_s
+    increment_build_number(build_number: build_number, xcodeproj: XCODE_PROJECT)
+    ipa = build_signed_ipa
+    upload_to_app_store(
+      api_key: app_store_api_key,
+      ipa: ipa,
+      force: true,
+      skip_metadata: true,      # listing is managed via the ASC API, not fastlane
+      skip_screenshots: true,
+      submit_for_review: false  # upload only — gate before submit
+    )
+    UI.message("ship_upload produced IPA at #{ipa}")
+  end
 end
