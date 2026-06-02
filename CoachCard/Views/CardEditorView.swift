@@ -62,7 +62,7 @@ struct CardEditorView: View {
                     drawingController: drawingController,
                     drawingEnabled: true
                 )
-                .aspectRatio(UIScreen.main.bounds.size, contentMode: .fit)
+                .aspectRatio(CardLayoutMetrics.referenceScreenSize, contentMode: .fit)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
                 .padding()
 

@@ -3,7 +3,7 @@ import UIKit
 import PencilKit
 
 enum CardLayoutMetrics {
-    static let referenceScreenSize = UIScreen.main.bounds.size
+    static let referenceScreenSize = CGSize(width: 1024, height: 768)
     static let textPadding: CGFloat = 32
     static let lineLimit = 5
 }
@@ -117,7 +117,7 @@ struct CardDrawingImageOverlay: View {
 
         return drawing.image(
             from: CGRect(origin: .zero, size: renderSize),
-            scale: UIScreen.main.scale
+            scale: 0
         )
     }
 }

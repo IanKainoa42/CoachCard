@@ -7,6 +7,9 @@ struct DisplayView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var currentIndex: Int = 0
     @State private var previousBrightness: CGFloat = 0.5
+    @State private var swipeDirection: SwipeDirection = .forward
+
+    enum SwipeDirection { case forward, backward }
 
     private var currentCard: Card {
         cards[currentIndex]
@@ -14,14 +17,21 @@ struct DisplayView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            CardCanvasView(
-                attributedText: currentCard.richTextContent,
-                theme: currentCard.theme,
-                glowEnabled: currentCard.glowEnabled,
-                glowColor: currentCard.richTextPrimaryColor,
-                drawingData: currentCard.persistedDrawingData,
-                drawingCanvasSize: currentCard.storedDrawingCanvasSize
-            )
+            ZStack {
+                CardCanvasView(
+                    attributedText: currentCard.richTextContent,
+                    theme: currentCard.theme,
+                    glowEnabled: currentCard.glowEnabled,
+                    glowColor: currentCard.richTextPrimaryColor,
+                    drawingData: currentCard.persistedDrawingData,
+                    drawingCanvasSize: currentCard.storedDrawingCanvasSize
+                )
+                .id(currentCard.id)
+                .transition(.asymmetric(
+                    insertion: .move(edge: swipeDirection == .forward ? .trailing : .leading),
+                    removal: .move(edge: swipeDirection == .forward ? .leading : .trailing)
+                ))
+            }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .onTapGesture {
                 dismiss()
@@ -38,9 +48,15 @@ struct DisplayView: View {
                         }
 
                         if value.translation.width < -50, currentIndex < cards.count - 1 {
-                            currentIndex += 1
+                            swipeDirection = .forward
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                                currentIndex += 1
+                            }
                         } else if value.translation.width > 50, currentIndex > 0 {
-                            currentIndex -= 1
+                            swipeDirection = .backward
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                                currentIndex -= 1
+                            }
                         }
                     }
             )

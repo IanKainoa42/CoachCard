@@ -18,24 +18,30 @@ struct FolderListView: View {
             }
 
             Section("Folders") {
-                ForEach(folders) { folder in
-                    NavigationLink(value: folder) {
-                        Label(folder.name, systemImage: "folder")
-                    }
-                    .contextMenu {
-                        Button("Rename") {
-                            renameFolderName = folder.name
-                            folderToRename = folder
+                if folders.isEmpty {
+                    ContentUnavailableView("No Folders", systemImage: "folder", description: Text("Create folders to organize your cards."))
+                        .listRowBackground(Color.clear)
+                } else {
+                    ForEach(folders) { folder in
+                        NavigationLink(value: folder) {
+                            Label(folder.name, systemImage: "folder")
                         }
-                        Button("Delete", role: .destructive) {
-                            if selectedFolder == folder {
-                                selectedFolder = nil
+                        .contextMenu {
+                            Button("Rename") {
+                                renameFolderName = folder.name
+                                folderToRename = folder
                             }
-                            modelContext.delete(folder)
+                            Button("Delete", role: .destructive) {
+                                if selectedFolder == folder {
+                                    selectedFolder = nil
+                                }
+                                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                                modelContext.delete(folder)
+                            }
                         }
                     }
+                    .onDelete(perform: deleteFolders)
                 }
-                .onDelete(perform: deleteFolders)
             }
         }
         .navigationTitle("CoachCard")
@@ -86,9 +92,12 @@ struct FolderListView: View {
         let newFolder = CardFolder(name: name, sortOrder: maxOrder + 1)
         modelContext.insert(newFolder)
         selectedFolder = newFolder
+        
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
     }
 
     private func deleteFolders(offsets: IndexSet) {
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         for index in offsets {
             let folder = folders[index]
             if selectedFolder == folder {

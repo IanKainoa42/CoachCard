@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct ScoreView: View {
     @Environment(\.dismiss) private var dismiss
@@ -9,6 +10,8 @@ struct ScoreView: View {
     @State private var dragOffsetAccumulator: CGFloat = 0
     @State private var isScrubbing = false
     @State private var hideControlsTask: Task<Void, Never>?
+
+    private let feedbackGenerator = UISelectionFeedbackGenerator()
 
     private let pointsPerStep: CGFloat = 22
     private let fastThreshold: CGFloat = 80
@@ -114,6 +117,7 @@ struct ScoreView: View {
             .onChanged { value in
                 if !isScrubbing {
                     isScrubbing = true
+                    feedbackGenerator.prepare()
                     showControls()
                     cancelHideTask()
                 }
@@ -140,6 +144,10 @@ struct ScoreView: View {
 
     private func adjustScore(by stepDelta: Int) {
         guard stepDelta != 0 else { return }
+        let oldIndex = scoreIndex
         scoreIndex = min(100, max(0, scoreIndex + stepDelta))
+        if oldIndex != scoreIndex {
+            feedbackGenerator.selectionChanged()
+        }
     }
 }

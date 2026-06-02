@@ -119,7 +119,7 @@ enum CardArtboardStore {
             let data = try JSONEncoder().encode(state)
             try data.write(to: url, options: .atomic)
         } catch {
-            print("Failed to save card artboard for \(id): \(error)")
+            // Silently fail for production stability, or replace with logger
         }
     }
 

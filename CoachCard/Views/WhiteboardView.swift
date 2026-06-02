@@ -86,14 +86,20 @@ struct WhiteboardView: View {
 
                 // Undo / Redo
                 HStack(spacing: 8) {
-                    Button { canvas.undo() } label: {
+                    Button {
+                        canvas.undo()
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    } label: {
                         Image(systemName: "arrow.uturn.backward.circle.fill")
                             .font(.system(size: 30))
                             .foregroundColor(theme.textColor)
                     }
                     .disabled(!canvas.canUndo)
 
-                    Button { canvas.redo() } label: {
+                    Button {
+                        canvas.redo()
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    } label: {
                         Image(systemName: "arrow.uturn.forward.circle.fill")
                             .font(.system(size: 30))
                             .foregroundColor(theme.textColor)
@@ -112,6 +118,9 @@ struct WhiteboardView: View {
                 .pickerStyle(.segmented)
                 .frame(width: 160)
                 .opacity(controlsVisible ? 0.8 : 0.15)
+                .onChange(of: toolMode) {
+                    UISelectionFeedbackGenerator().selectionChanged()
+                }
 
                 if toolMode == .draw {
                     ColorPicker("", selection: $penColor, supportsOpacity: false)
@@ -133,7 +142,10 @@ struct WhiteboardView: View {
                 }
                 .opacity(controlsVisible ? 0.8 : 0.15)
 
-                Button { canvas.clear() } label: {
+                Button {
+                    canvas.clear()
+                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                } label: {
                     Image(systemName: "trash.circle.fill")
                         .font(.system(size: 30))
                         .foregroundColor(theme.textColor)
