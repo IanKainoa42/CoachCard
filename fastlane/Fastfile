@@ -76,13 +76,30 @@ platform :ios do
       xcodeproj: XCODE_PROJECT
     )
 
+    # The project uses Automatic signing for local Xcode dev. CI runners have no
+    # signed-in Xcode account, so automatic signing can't resolve a profile and
+    # the archive fails. Flip to manual at build time so gym uses the App Store
+    # profile that `match` just installed. (Runtime only — not committed.)
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: XCODE_PROJECT,
+      team_id: TEAM_ID,
+      code_sign_identity: "Apple Distribution",
+      profile_name: "match AppStore #{APP_IDENTIFIER}",
+      targets: [SCHEME]
+    )
+
     build_app(
       project: XCODE_PROJECT,
       scheme: SCHEME,
       export_method: "app-store",
       clean: true,
       output_directory: "./build",
-      output_name: "CoachCard"
+      output_name: "CoachCard",
+      export_options: {
+        signingStyle: "manual",
+        provisioningProfiles: { APP_IDENTIFIER => "match AppStore #{APP_IDENTIFIER}" }
+      }
     )
 
     upload_to_testflight(
