@@ -194,4 +194,22 @@ platform :ios do
     )
     UI.message("ship_upload produced IPA at #{ipa}")
   end
+
+  desc "Update App Review Information Notes in App Store Connect"
+  lane :update_review_notes do
+    notes = File.read("../app_store_review_notes.txt")
+    
+    upload_to_app_store(
+      api_key: app_store_api_key,
+      skip_binary_upload: true,
+      skip_screenshots: true,
+      force: true,
+      submit_for_review: false,
+      app_review_information: {
+        notes: notes,
+        demoAccountRequired: false
+      }
+    )
+    UI.success("Successfully updated App Review Information Notes in App Store Connect!")
+  end
 end
