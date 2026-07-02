@@ -17,10 +17,19 @@ struct FolderListView: View {
                 Label("All Cards", systemImage: "square.grid.2x2")
             }
 
-            Section("Folders") {
+            Section {
                 if folders.isEmpty {
-                    ContentUnavailableView("No Folders", systemImage: "folder", description: Text("Create folders to organize your cards."))
-                        .listRowBackground(Color.clear)
+                    ContentUnavailableView {
+                        Label("No Folders", systemImage: "folder")
+                    } description: {
+                        Text("Create folders to organize your cards.")
+                    } actions: {
+                        Button("New Folder") {
+                            newFolderName = ""
+                            showingNewFolderAlert = true
+                        }
+                    }
+                    .listRowBackground(Color.clear)
                 } else {
                     ForEach(folders) { folder in
                         NavigationLink(value: folder) {
@@ -42,9 +51,24 @@ struct FolderListView: View {
                     }
                     .onDelete(perform: deleteFolders)
                 }
+            } header: {
+                HStack {
+                    Text("Folders")
+                    Spacer()
+                    Button("+ New Folder") {
+                        newFolderName = ""
+                        showingNewFolderAlert = true
+                    }
+                    .font(.caption)
+                    .textCase(nil)
+                }
             }
         }
         .navigationTitle("CoachCard")
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("ShowNewFolderAlert"))) { _ in
+            newFolderName = ""
+            showingNewFolderAlert = true
+        }
         .toolbar {
             ToolbarItem(placement: .bottomBar) {
                 Button {
