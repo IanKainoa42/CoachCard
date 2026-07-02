@@ -1,0 +1,22 @@
+**2. Device models and operating systems tested:**
+The app was extensively tested on physical iPad devices running iOS 17+, including the iPad Pro 13-inch (M4).
+
+**3. App's purpose and target audience:**
+CoachCard is a silent coaching whiteboard designed specifically for the iPad. The target audience is sports coaches (e.g., gymnastics, swimming, basketball, track). 
+The problem it solves is the difficulty of communicating with athletes from across a loud or crowded gym/field. It provides value by allowing coaches to flash scores, cues, and hand-drawn messages to athletes from 20+ feet away without needing to shout.
+
+**4. Instructions for setting up and accessing the app's main features:**
+There is no setup required. The app does not require any login credentials, account creation, or sample files. Upon launching the app, users are immediately presented with the main Card Gallery (which includes two default demo cards). Users can access all main features directly from this screen:
+- Tap '+' to access the Card Editor.
+- Tap any card to access the Full-Screen Display.
+- Tap 'Score' to access the Score Flipbook.
+- Tap 'Whiteboard' to access the freehand drawing canvas.
+
+**5. External services, tools, or platforms:**
+None. CoachCard is a fully local iPad application. It does not use any external network requests, data providers, authentication services, payment processors, or AI services. All data is persisted locally on the device using SwiftData.
+
+**6. Regional differences:**
+There are no regional differences. The app functions consistently across all regions.
+
+**7. Regulated industry / protected third-party material:**
+CoachCard does not operate in a highly regulated industry and does not include or provide access to any protected third-party material.
