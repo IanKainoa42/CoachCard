@@ -85,11 +85,23 @@ struct GalleryView: View {
                 }
             }
             ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    editingCard = nil
-                    showingEditor = true
+                Menu {
+                    Button {
+                        editingCard = nil
+                        showingEditor = true
+                    } label: {
+                        Label("New Card", systemImage: "rectangle.portrait.badge.plus")
+                    }
+                    Button {
+                        NotificationCenter.default.post(
+                            name: Notification.Name("ShowNewFolderAlert"),
+                            object: nil
+                        )
+                    } label: {
+                        Label("New Folder", systemImage: "folder.badge.plus")
+                    }
                 } label: {
-                    Label("New Card", systemImage: "plus.circle.fill")
+                    Label("Add", systemImage: "plus.circle.fill")
                 }
             }
         }
