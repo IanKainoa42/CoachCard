@@ -42,3 +42,6 @@ Not applicable. CoachCard does not operate in a regulated industry and contains 
 ## After replying
 - Also PATCH these notes into the `appStoreReviewDetail.notes` via ASC API so every future submission carries them.
 - Resubmit: Resolution Center → "Resubmit to App Review" (same build 11 is fine — the rejection asked for info, not a new binary).
+
+## STATUS: SENT 2026-07-03 11:46 AM PT
+Reply posted in Resolution Center with all 7 items + CoachCard-AppReview-Demo.mp4 (75s, verified home-screen launch → gallery → compose → drawing → full-screen finale). One attachment, no dupes. "Resubmit to App Review" stays disabled for 2.1 info requests — the reply IS the re-engagement. Waiting on Apple.
