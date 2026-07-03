@@ -270,6 +270,7 @@ final class RichTextEditorController: NSObject, ObservableObject {
             fallback: defaultStyle
         )
         syncTextView()
+        updateBackgroundColor()
     }
 
     func updateFallbackColor(_ color: UIColor) {
@@ -278,12 +279,12 @@ final class RichTextEditorController: NSObject, ObservableObject {
             selectedStyle.color = color
             syncTypingAttributes()
         }
+        updateBackgroundColor()
     }
 
     func attach(to textView: UITextView) {
         if self.textView !== textView {
             self.textView = textView
-            textView.backgroundColor = .clear
             textView.autocapitalizationType = .allCharacters
             textView.autocorrectionType = .no
             textView.spellCheckingType = .no
@@ -298,6 +299,7 @@ final class RichTextEditorController: NSObject, ObservableObject {
         }
 
         syncTextView()
+        updateBackgroundColor()
     }
 
     func textDidChange(_ textView: UITextView) {
@@ -424,6 +426,38 @@ final class RichTextEditorController: NSObject, ObservableObject {
         paragraphStyle.alignment = .center
         paragraphStyle.lineBreakMode = .byWordWrapping
         return paragraphStyle
+    }
+
+    private func updateBackgroundColor() {
+        guard let textView = textView else { return }
+
+        textView.layer.cornerRadius = 16
+
+        var white: CGFloat = 0
+        var alpha: CGFloat = 0
+        if fallbackColor.getWhite(&white, alpha: &alpha) {
+            if white > 0.5 {
+                textView.backgroundColor = UIColor(white: 0.1, alpha: 1.0)
+            } else {
+                textView.backgroundColor = .white
+            }
+        } else {
+            // If it's not a grayscale color, we'll try to get RGB to check luminance
+            var red: CGFloat = 0
+            var green: CGFloat = 0
+            var blue: CGFloat = 0
+            if fallbackColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha) {
+                let luminance = 0.299 * red + 0.587 * green + 0.114 * blue
+                if luminance > 0.5 {
+                    textView.backgroundColor = UIColor(white: 0.1, alpha: 1.0)
+                } else {
+                    textView.backgroundColor = .white
+                }
+            } else {
+                // Fallback if we somehow can't get color components
+                textView.backgroundColor = UIColor(white: 0.1, alpha: 1.0)
+            }
+        }
     }
 }
 
