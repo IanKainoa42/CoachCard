@@ -1,5 +1,15 @@
 default_platform(:ios)
 
+
+# Archive with the release Xcode, not whatever `xcode-select` points at.
+# macOS 27 hard-disables Xcode 26.6's GUI, so xcode-select was moved to the
+# Xcode 27 RC (2026-09-11) — and ASC acceptance of an RC-built upload is
+# unverified. An explicit DEVELOPER_DIR still wins.
+RELEASE_XCODE = "/Applications/Xcode-26.6.0.app/Contents/Developer"
+if ENV["DEVELOPER_DIR"].to_s.empty? && File.directory?(RELEASE_XCODE)
+  ENV["DEVELOPER_DIR"] = RELEASE_XCODE
+end
+
 APP_IDENTIFIER = "com.ianrichardson.CoachCard"
 XCODE_PROJECT = "CoachCard.xcodeproj"
 SCHEME = "CoachCard"
