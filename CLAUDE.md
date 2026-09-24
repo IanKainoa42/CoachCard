@@ -60,3 +60,9 @@ Both share the pattern of `NSObject + ObservableObject + PKCanvasViewDelegate` t
 - **GlowModifier** uses `.compositingGroup()` to render four shadow layers as a single composited pass.
 - **Async patterns** — ScoreView and DisplayView use `Task.sleep` with cancellation instead of Timer for debouncing and auto-hide.
 - **Score scrubbing** — ScoreView uses a custom `DragGesture` with accumulated offset tracking (`pointsPerStep: 22`) for tactile score adjustment.
+
+## Dependabot / Lockfile Hygiene
+
+**Merging multiple Dependabot PRs against the same `Gemfile.lock` in sequence can silently revert an earlier fix.** PR #7 (2026-09-16) correctly bumped `excon` 0.109.0 → 1.5.0 to patch a GHSA security alert. When `origin/main` (which by then included the separate `faraday` bump from PR #8) was merged into PR #7's branch, the merge commit reverted `excon` back to the vulnerable 0.109.0 in `Gemfile.lock` — the security fix silently disappeared from `main` and needed a follow-up PR (#10, 2026-09-18) to catch and re-fix it via a full lockfile regen.
+
+**Rule:** When merging back-to-back Dependabot PRs that touch the same lockfile, merge and verify one at a time (`grep '  <gem> (' Gemfile.lock` after each merge) rather than approving several in a row — a merge commit between two dependency-bump branches can revert either one. If several land close together anyway, regenerate `Gemfile.lock` from scratch with `bundle lock` and diff the specific gem versions before trusting the file.
