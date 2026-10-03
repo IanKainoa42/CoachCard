@@ -38,3 +38,6 @@ Package.resolved
 ## Fastlane generated output
 fastlane/README.md
 fastlane/report.xml
+
+# App Store Connect API key (never commit)
+fastlane/AuthKey.json

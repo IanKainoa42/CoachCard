@@ -10,6 +10,8 @@ if ENV["DEVELOPER_DIR"].to_s.empty? && File.directory?(RELEASE_XCODE)
   ENV["DEVELOPER_DIR"] = RELEASE_XCODE
 end
 
+require "json"
+
 APP_IDENTIFIER = "com.ianrichardson.CoachCard"
 XCODE_PROJECT = "CoachCard.xcodeproj"
 SCHEME = "CoachCard"
@@ -21,6 +23,16 @@ TEAM_ID = "WC46K49VFA"
 # - APP_STORE_CONNECT_API_KEY_CONTENT -> base64-encoded .p8 contents
 #   with APP_STORE_CONNECT_API_KEY_ID and APP_STORE_CONNECT_API_ISSUER_ID.
 def app_store_api_key
+  # Local /ship path: fastlane/AuthKey.json (gitignored) — same format as FormationFlow.
+  json_path = File.join(__dir__, "AuthKey.json")
+  if File.exist?(json_path)
+    cfg = JSON.parse(File.read(json_path))
+    return app_store_connect_api_key(
+      key_id: cfg["key_id"], issuer_id: cfg["issuer_id"],
+      key_content: cfg["key"], duration: 1200, in_house: false
+    )
+  end
+
   # Ruby 4.0 + OpenSSL 3.x breaks base64 key_content loading ("invalid curve name").
   # Use key_filepath (path to the raw .p8 file) to avoid the issue.
   p8_path = ENV["APP_STORE_CONNECT_API_KEY_JSON_PATH"]
@@ -221,5 +233,52 @@ platform :ios do
       }
     )
     UI.success("Successfully updated App Review Information Notes in App Store Connect!")
+  end
+
+  desc "Submit an already-uploaded build for review, auto-release after approval. (/ship Phase 2)"
+  lane :ship_submit do
+    app_version = ENV["SHIP_APP_VERSION"].to_s.strip
+    build_number = ENV["SHIP_BUILD_NUMBER"].to_s.strip
+    release_notes = ENV["SHIP_RELEASE_NOTES"].to_s.strip
+    UI.user_error!("SHIP_APP_VERSION is required") if app_version.empty?
+    UI.user_error!("SHIP_BUILD_NUMBER is required") if build_number.empty?
+    UI.user_error!("SHIP_RELEASE_NOTES is required") if release_notes.empty?
+
+    # No fastlane/metadata dir — only What's New is pushed, via release_notes.
+    upload_to_app_store(
+      api_key: app_store_api_key,
+      app_identifier: APP_IDENTIFIER,
+      app_version: app_version,
+      build_number: build_number,
+      skip_binary_upload: true,   # binary already uploaded by ship_upload
+      skip_metadata: false,
+      skip_screenshots: true,
+      release_notes: { "en-US" => release_notes },
+      force: true,
+      run_precheck_before_submit: false, # precheck needs Apple ID auth, not API-key auth
+      precheck_include_in_app_purchases: false,
+      reject_if_possible: true,
+      submit_for_review: true,
+      automatic_release: true,
+      submission_information: { export_compliance_uses_encryption: false }
+    )
+  end
+
+  desc "Print latest App Store build status as JSON (read-only). Used by /ship pre-flight."
+  lane :asc_build_status do
+    require "spaceship"
+    cfg = JSON.parse(File.read(File.join(__dir__, "AuthKey.json")))
+    Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.create(
+      key_id: cfg["key_id"], issuer_id: cfg["issuer_id"], key: cfg["key"]
+    )
+    app = Spaceship::ConnectAPI::App.find(APP_IDENTIFIER)
+    rows = app.get_builds(limit: 25, sort: "-uploadedDate").map do |b|
+      { build: b.version, processingState: b.processing_state, uploaded: b.uploaded_date }
+    end
+    UI.message("ASC_BUILD_STATUS_JSON=" + rows.to_json)
+    versions = app.get_app_store_versions(limit: 5).map do |v|
+      { version: v.version_string, state: v.app_store_state }
+    end
+    UI.message("ASC_VERSIONS_JSON=" + versions.to_json)
   end
 end
