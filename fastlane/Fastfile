@@ -212,6 +212,7 @@ platform :ios do
       force: true,
       skip_metadata: true,      # listing is managed via the ASC API, not fastlane
       skip_screenshots: true,
+      run_precheck_before_submit: false, # precheck needs Apple ID auth, not API key
       submit_for_review: false  # upload only — gate before submit
     )
     UI.message("ship_upload produced IPA at #{ipa}")
