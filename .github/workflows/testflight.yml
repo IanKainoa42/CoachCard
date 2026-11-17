@@ -1,15 +1,6 @@
 name: CoachCard TestFlight
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "CoachCard/**"
-      - "CoachCard.xcodeproj/**"
-      - "fastlane/**"
-      - "Gemfile"
-      - ".github/workflows/testflight.yml"
   workflow_dispatch:
 
 jobs:
