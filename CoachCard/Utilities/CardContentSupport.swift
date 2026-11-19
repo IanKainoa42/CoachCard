@@ -512,7 +512,12 @@ extension Card {
     }
 
     var richTextPrimaryColor: Color {
-        Color(uiColor: richTextContent.cardPrimaryColor(fallback: UIColor(resolvedTextColor)))
+        richTextPrimaryColor(in: richTextContent)
+    }
+
+    /// For callers that already hold `richTextContent`, so the RTF is not decoded twice.
+    func richTextPrimaryColor(in content: NSAttributedString) -> Color {
+        Color(uiColor: content.cardPrimaryColor(fallback: UIColor(resolvedTextColor)))
     }
 
     var persistedDrawingData: Data? {

@@ -17,12 +17,13 @@ struct DisplayView: View {
 
     var body: some View {
         GeometryReader { geometry in
+            let content = currentCard.richTextContent
             ZStack {
                 CardCanvasView(
-                    attributedText: currentCard.richTextContent,
+                    attributedText: content,
                     theme: currentCard.theme,
                     glowEnabled: currentCard.glowEnabled,
-                    glowColor: currentCard.richTextPrimaryColor,
+                    glowColor: currentCard.richTextPrimaryColor(in: content),
                     drawingData: currentCard.persistedDrawingData,
                     drawingCanvasSize: currentCard.storedDrawingCanvasSize
                 )

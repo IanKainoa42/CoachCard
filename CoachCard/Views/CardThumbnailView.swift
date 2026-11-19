@@ -4,11 +4,12 @@ struct CardThumbnailView: View {
     let card: Card
 
     var body: some View {
-        CardCanvasView(
-            attributedText: card.richTextContent,
+        let content = card.richTextContent
+        return CardCanvasView(
+            attributedText: content,
             theme: card.theme,
             glowEnabled: card.glowEnabled,
-            glowColor: card.richTextPrimaryColor,
+            glowColor: card.richTextPrimaryColor(in: content),
             drawingData: card.persistedDrawingData,
             drawingCanvasSize: card.storedDrawingCanvasSize
         )
