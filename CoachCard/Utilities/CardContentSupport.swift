@@ -539,8 +539,10 @@ extension NSAttributedString {
         fallbackText: String,
         fallbackFontSize: CGFloat,
         fallbackColor: UIColor,
-        fallbackBold: Bool = true,
-        fallbackUnderline: Bool = false
+        // Autoclosures: Card passes legacy-artboard lookups here, each one a file read.
+        // They are only needed when there is no RTF to decode.
+        fallbackBold: @autoclosure () -> Bool = true,
+        fallbackUnderline: @autoclosure () -> Bool = false
     ) -> NSAttributedString {
         if
             let data,
@@ -560,8 +562,8 @@ extension NSAttributedString {
             fallbackText,
             fontSize: fallbackFontSize,
             color: fallbackColor,
-            isBold: fallbackBold,
-            isUnderlined: fallbackUnderline
+            isBold: fallbackBold(),
+            isUnderlined: fallbackUnderline()
         )
     }
 
