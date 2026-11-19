@@ -387,7 +387,10 @@ final class RichTextEditorController: NSObject, ObservableObject {
         isUpdatingTextView = true
         textView.attributedText = attributedText
         let clampedLocation = min(selectedRange.location, attributedText.length)
-        textView.selectedRange = NSRange(location: clampedLocation, length: 0)
+        // This runs from updateUIView on every publish, including the one a selection
+        // change makes, so it has to keep the selection too or none survives an update.
+        let clampedLength = min(selectedRange.length, attributedText.length - clampedLocation)
+        textView.selectedRange = NSRange(location: clampedLocation, length: clampedLength)
         syncTypingAttributes()
         isUpdatingTextView = false
     }
