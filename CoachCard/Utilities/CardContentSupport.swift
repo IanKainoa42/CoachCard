@@ -369,7 +369,10 @@ final class RichTextEditorController: NSObject, ObservableObject {
         isUpdatingTextView = true
         textView.attributedText = normalized
         let clampedLocation = min(selectedRange.location, normalized.length)
-        textView.selectedRange = NSRange(location: clampedLocation, length: 0)
+        // Keep the selection: the size slider and colour picker call in once per step,
+        // and every step after the first has to land on the same characters.
+        let clampedLength = min(selectedRange.length, normalized.length - clampedLocation)
+        textView.selectedRange = NSRange(location: clampedLocation, length: clampedLength)
         attributedText = normalized
         selectedStyle = selectionStyle(in: textView)
         syncTypingAttributes()
